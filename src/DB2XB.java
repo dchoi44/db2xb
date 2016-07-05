@@ -29,26 +29,26 @@ public class DB2XB {
 			if (files[i].isFile()) {
 				PrintWriter pw = new PrintWriter("./output/c_" + files[i].getName());
 				BufferedReader br = new BufferedReader(new FileReader("./input/" + files[i].getName()));
-				int neg = 0;
+				int negs = 0, negp = 0, nego = 0, tot = 0;
 				while (true) {
 					String line, S = null, P = null, O = null;
 					line = br.readLine();
 					if (line == null)
 						break;
-
+					tot += 1;
 					String[] words = line.split("\t");
 					
 					if (hash_o.containsKey(words[0].replace("<", "").replace(">", "").split("resource/")[1]))
 						S = "<" + pre_o + hash_o.get(words[0].replace("<", "").replace(">", "").split("resource/")[1]) + ">";
 					else{
-						neg += 1;
+						negs += 1;
 						continue;
 					}
 					
 					if (hash_p.containsKey(words[1].replace("<", "").replace(">", "").split("ontology/")[1]))
 						P = "<" + pre_p + hash_p.get(words[1].replace("<", "").replace(">", "").split("ontology/")[1]) + ">";
 					else{
-						neg += 1;
+						negp += 1;
 						continue;
 					}
 					
@@ -56,7 +56,7 @@ public class DB2XB {
 						if(hash_o.containsKey(words[2].replace("<", "").replace(">", "").replace(".","").trim().split("resource/")[1]))
 							O = "<" + pre_o + hash_o.get(words[2].replace("<", "").replace(">", "").replace(".","").trim().split("resource/")[1]) + ">";
 						else{
-							neg += 1;
+							nego += 1;
 							continue;
 						}
 					}
@@ -67,7 +67,8 @@ public class DB2XB {
 				}
 				br.close();
 				pw.close();
-				System.out.println(files[i].getName()+": Done, " + neg + " lines has been neglected.");
+				System.out.println(files[i].getName()+": Done, " + (negs+negp+nego) + "/" + tot + " lines(" + (negs + negp + nego)*100/(float)tot + "%) had been neglected.");
+				System.out.println(negs + " subjects, " + negp + " properties, " + nego + " objects are unmapped.");
 			}
 			else {
 				System.out.println("No sub-directory allowed. Ignoring it..");
