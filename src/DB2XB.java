@@ -13,7 +13,8 @@ public class DB2XB {
 		// }
 
 		makedict_o(hash_o);
-		makedict_p(hash_p);
+		new_makedict_p(hash_p);
+		//makedict_p(hash_p);
 
 		convert(hash_o, hash_p);
 	}
@@ -27,7 +28,9 @@ public class DB2XB {
 		
 		for (int i = 0; i < files.length; i++) {
 			if (files[i].isFile()) {
+				Hashtable<String, String> hash_d = new Hashtable<String, String>();
 				PrintWriter pw = new PrintWriter("./output/c_" + files[i].getName());
+				PrintWriter pw1 = new PrintWriter("./output/n_" + files[i].getName());
 				BufferedReader br = new BufferedReader(new FileReader("./input/" + files[i].getName()));
 				int negs = 0, negp = 0, nego = 0, tot = 0;
 				while (true) {
@@ -38,17 +41,21 @@ public class DB2XB {
 					tot += 1;
 					String[] words = line.split("\t");
 					
-					if (hash_o.containsKey(words[0].replace("<", "").replace(">", "").split("resource/")[1]))
-						S = "<" + pre_o + hash_o.get(words[0].replace("<", "").replace(">", "").split("resource/")[1]) + ">";
-					else{
-						negs += 1;
-						continue;
-					}
-					
 					if (hash_p.containsKey(words[1].replace("<", "").replace(">", "").split("ontology/")[1]))
 						P = "<" + pre_p + hash_p.get(words[1].replace("<", "").replace(">", "").split("ontology/")[1]) + ">";
 					else{
 						negp += 1;
+						if(!hash_d.containsKey(words[1])){
+							pw1.println(words[1]);
+							hash_d.put(words[1], String.valueOf(negp));
+						}
+						continue;
+					}
+					
+					if (hash_o.containsKey(words[0].replace("<", "").replace(">", "").split("resource/")[1]))
+						S = "<" + pre_o + hash_o.get(words[0].replace("<", "").replace(">", "").split("resource/")[1]) + ">";
+					else{
+						negs += 1;
 						continue;
 					}
 					
@@ -67,6 +74,7 @@ public class DB2XB {
 				}
 				br.close();
 				pw.close();
+				pw1.close();
 				System.out.println(files[i].getName()+": Done, " + (negs+negp+nego) + "/" + tot + " lines(" + (negs + negp + nego)*100/(float)tot + "%) had been neglected.");
 				System.out.println(negs + " subjects, " + negp + " properties, " + nego + " objects are unmapped.");
 			}
@@ -95,6 +103,21 @@ public class DB2XB {
 		br.close();
 	}
 
+	public static void new_makedict_p(Hashtable<String, String> hash_p) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader("./mapping/1st_mapped_rlt_180"));
+		while (true) {
+			String line;
+			line = br.readLine();
+			if(line == null) break;
+			if(line.split(",").length != 2) break;
+			String fst,snd;
+			fst = line.split(",")[0];
+			snd = line.split(",")[1];
+			hash_p.put(fst,snd);			
+		}
+		br.close();
+	}
+	
 	public static void makedict_p(Hashtable<String, String> hash_p) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader("./mapping/m_dbo2xbo.csv"));
 		while (true) {
