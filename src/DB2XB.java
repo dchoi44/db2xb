@@ -5,6 +5,7 @@ public class DB2XB {
 	public static void main(String[] args) throws IOException {
 		Hashtable<String, String> hash_p = new Hashtable<String, String>();
 		Hashtable<String, String> hash_o = new Hashtable<String, String>();
+		Hashtable<String, String> hash_l = new Hashtable<String, String>();
 
 		// if (args.length != 0){
 		// for(int i = 0; i < args.length ; i++){
@@ -13,13 +14,14 @@ public class DB2XB {
 		// }
 
 		makedict_o(hash_o);
-		new_makedict_p(hash_p);
-		//makedict_p(hash_p);
+		makedict_p(hash_p);
+		makedict_l(hash_l);
+		//old_makedict_p(hash_p);
 
-		convert(hash_o, hash_p);
+		convert(hash_o, hash_p, hash_l);
 	}
 
-	public static void convert(Hashtable<String, String> hash_o, Hashtable<String, String> hash_p) throws IOException {
+	public static void convert(Hashtable<String, String> hash_o, Hashtable<String, String> hash_p, Hashtable<String, String> hash_l) throws IOException {
 		File dir = new File("./input");
 		File[] files = dir.listFiles();
 		String pre_o, pre_p;
@@ -67,9 +69,21 @@ public class DB2XB {
 							continue;
 						}
 					}
-					else
-						O = words[2];
+					else{
+						if (words[2].contains("http://www.w3.org/2001/XMLSchema#date")){
+							if (hash_l.containsKey(words[2].replace("date", "string")))
+								O = hash_l.get(words[2].replace("date", "string"));
+							else{
+								nego += 1;
+								continue;
+							}
+						}
+						else{
+							nego += 1;
+							continue;
+						}
 					
+					}
 					pw.println(S + "\t" + P + "\t" + O + "\t.");
 				}
 				br.close();
@@ -103,7 +117,7 @@ public class DB2XB {
 		br.close();
 	}
 
-	public static void new_makedict_p(Hashtable<String, String> hash_p) throws IOException {
+	public static void makedict_p(Hashtable<String, String> hash_p) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader("./mapping/1st_mapped_rlt_180"));
 		while (true) {
 			String line;
@@ -118,7 +132,23 @@ public class DB2XB {
 		br.close();
 	}
 	
-	public static void makedict_p(Hashtable<String, String> hash_p) throws IOException {
+	public static void makedict_l(Hashtable<String, String> hash_d) throws IOException{
+		BufferedReader br = new BufferedReader(new FileReader("./mapping/xb_label_info"));
+		while(true){
+			String line;
+			line = br.readLine();
+			if(line == null) break;
+			String[] words = line.split(" ");
+			String fst, snd;
+			fst = words[2];
+			snd = words[0];
+			hash_d.put(fst, snd);			
+		}
+		br.close();
+		
+	}
+	
+	public static void old_makedict_p(Hashtable<String, String> hash_p) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader("./mapping/m_dbo2xbo.csv"));
 		while (true) {
 			String line;

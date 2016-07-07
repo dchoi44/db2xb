@@ -178,6 +178,8 @@ march,anthem
 subsidiary,affiliatedOrganization
 sisterNewspaper,affiliatedOrganization
 contractor,advocator
+birthDate,bornOn
+deathDate,diedOn
 selection,
 vicePresident,
 namedAfter,
